@@ -1,0 +1,107 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "smarttalent",
+      "password": "smarttalent2023",
+      "token": "smartalent1"
+    },
+    {
+      "id": 2,
+      "username": "smarttalent2",
+      "password": "smarttalent2023",
+      "token": "smartalent2"
+    }
+  ],
+  "hotels": [
+    {
+      "id": 1,
+      "name": "LasVegas",
+      "city": "Medellín",
+      "address": "Calle 1",
+      "rooms": [],
+      "available_rooms": [
+        {
+          "id": 1,
+          "number": 101,
+          "base_price": 80000,
+          "location": "Piso1",
+          "type": "Individual",
+          "tax": 20,
+          "max_people": 6,
+          "status": true
+        },
+        {
+          "id": 2,
+          "number": 102,
+          "base_price": 80000,
+          "tax": 20,
+          "location": "Piso 1",
+          "type": "Individual",
+          "max_people": 6,
+          "status": true
+        },
+        {
+          "id": 3,
+          "number": 103,
+          "base_price": 80000,
+          "tax": 20,
+          "location": "Piso 1",
+          "type": "Individual",
+          "max_people": 6,
+          "status": true
+        },
+        {
+          "id": 4,
+          "number": 201,
+          "base_price": 130000,
+          "tax": 20,
+          "location": "Piso 1",
+          "type": "Individual",
+          "max_people": 6,
+          "status": true
+        },
+        {
+          "id": 5,
+          "number": 203,
+          "base_price": 80000,
+          "tax": 20,
+          "location": "Piso 2",
+          "type": "Individual",
+          "max_people": 6,
+          "status": true
+        },
+        {
+          "id": 6,
+          "number": 301,
+          "base_price": 100000,
+          "tax": 20,
+          "location": "Piso 3",
+          "type": "Individual",
+          "max_people": 6,
+          "status": true
+        }
+      ],
+      "status": true
+    },
+    {
+      "name": "Nasus INC",
+      "city": "Bogotá",
+      "address": "Calle 181 #10-10",
+      "id": 2,
+      "rooms": [],
+      "available_rooms": [],
+      "status": true
+    },
+    {
+      "name": "WilliamHotelus",
+      "city": "Popayán",
+      "address": "Calle 120 #10-1",
+      "id": 3,
+      "rooms": [],
+      "available_rooms": [],
+      "status": true
+    }
+  ],
+  "auth": []
+}
