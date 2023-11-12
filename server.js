@@ -22,13 +22,15 @@ jsonServerApp.post('/authenticate', (req, res) => {
   if (user) {
     res.json({ username: user.username, token: user.token });
   } else {
-    res.status(401).json({ error: 'Invalid credentials' });
+    res.status(401).json({ error: 'Credenciales invalidas' });
   }
 });
 
 jsonServerApp.get('/users', (req, res) => {
   res.json(jsonServerRouter.db.get('users'));
 });
+
+//Hotels apis
 
 jsonServerApp.get('/hotels', (req, res) => {
   res.json(jsonServerRouter.db.get('hotels'));
@@ -41,7 +43,7 @@ jsonServerApp.get('/hotels/:id', (req, res) => {
   if (hotel) {
     res.json(hotel);
   } else {
-    res.status(404).json({ success: false, message: 'Hotel not found' });
+    res.status(404).json({ success: false, message: 'Hoteles no encontrados' });
   }
 });
 
@@ -55,29 +57,26 @@ jsonServerApp.patch('/hotels/:id', (req, res) => {
     hotel.address = data.address;
     hotel.city = data.city;
     jsonServerRouter.db.set('hotels', hotels).write();
-    // Respond with a success message
-    res.json({ success: true, message: 'Hotel data updated successfully' });
+    res.json({ success: true, message: 'Hotel actualizado correctamente' });
   } else {
-    // If the hotel with the specified id is not found, respond with a 404 status
-    res.status(404).json({ success: false, message: 'Hotel not found' });
+    res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
 
 jsonServerApp.post('/hotels', (req, res) => {
-  console.log(req.body)
   const newHotel = req.body;
   const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
-  newHotel.id = hotels.length + 1; // Assign a new id to the hotel
-  newHotel.rooms = []; // Assign empty rooms to the new hotel
-  newHotel.available_rooms = []; // Assign a default available rooms to the hotel
-  newHotel.status = true; // Assign a default available status to the hotel
+  newHotel.id = hotels.length + 1;
+  newHotel.rooms = [];
+  newHotel.available_rooms = [];
+  newHotel.status = true;
   hotels.push(newHotel);
   const resp = jsonServerRouter.db.set('hotels', hotels).write();
   if(resp){
-    res.json({ hotel: newHotel,success: true, message: 'Hotel created successfully' });
+    res.json({ hotel: newHotel,success: true, message: 'Hotel creado satisfactoriamente' });
   }
   else{
-    res.status(404).json({ success: false, message: 'Hotel creation failed' });
+    res.status(404).json({ success: false, message: 'Hubo un error al crear el hotel' });
   }
 });
 
@@ -89,21 +88,109 @@ jsonServerApp.patch('/hotels/:id/status', (req, res) => {
   if (hotel) {
     hotel.status = newStatus;
     jsonServerRouter.db.set('hotels', hotels).write();
-    // Respond with a success message
-    res.json({ success: true, message: 'Hotel status updated successfully' });
+    res.json({ success: true, message: 'Estado del hotel actualizado satisfactoriamente' });
   } else {
-    // If the hotel with the specified id is not found, respond with a 404 status
-    res.status(404).json({ success: false, message: 'Hotel not found' });
+    res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
+
+jsonServerApp.delete('/hotels/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
+  const index = hotels.findIndex((hotel) => hotel.id === id);
+
+  if (index !== -1) {
+    hotels.splice(index, 1);
+    jsonServerRouter.db.set('hotels', hotels).write();
+    res.json({ success: true, message: 'Hotel borrado satisfactoriamente' });
+  } else {
+    res.status(404).json({ success: false, message: 'Hotel no encontrado' });
+  }
+});
+
+//End hotels apis
+
+//Rooms apis
+
+jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId/status', (req, res) => {
+  const hotelId = parseInt(req.params.hotelId, 10);
+  const roomId = parseInt(req.params.roomId, 10);
+  const newStatus = req.body.status;
+
+  const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
+  const hotel = hotels.find((hotel) => hotel.id === hotelId);
+
+  if (hotel) {
+    const room = hotel.available_rooms.find((room) => room.id === roomId);
+    if (room) {
+      room.status = newStatus;
+
+      jsonServerRouter.db.set('hotels', hotels).write();
+      res.json({ success: true, message: 'Estado de la habitación actualizado satisfactoriamente' });
+    } else {
+      res.status(404).json({ success: false, message: 'Habitación no encontrada' });
+    }
+  } else {
+    res.status(404).json({ success: false, message: 'Hotel no encontrado' });
+  }
+});
+
+jsonServerApp.post('/hotels/:id/available-rooms', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const newAvailableRoom = req.body;
+  const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
+  const hotel = hotels.find((hotel) => hotel.id === id);
+
+  if (hotel) {
+    // Asigna un nuevo id a la habitación disponible
+    newAvailableRoom.id = hotel.available_rooms.length + 1;
+    newAvailableRoom.status = true
+    hotel.available_rooms.push(newAvailableRoom);
+
+    jsonServerRouter.db.set('hotels', hotels).write();
+    res.json({ success: true, message: 'Habitación agregada satisfactoriamente' });
+  } else {
+    res.status(404).json({ success: false, message: 'Hotel no encontrado' });
+  }
+});
+
+
+jsonServerApp.delete('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
+  const hotelId = parseInt(req.params.hotelId, 10);
+  const roomId = parseInt(req.params.roomId, 10);
+
+  const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
+  const hotel = hotels.find((hotel) => hotel.id === hotelId);
+
+  if (hotel) {
+    const index = hotel.available_rooms.findIndex((room) => room.id === roomId);
+
+    if (index !== -1) {
+      hotel.available_rooms.splice(index, 1);
+
+      jsonServerRouter.db.set('hotels', hotels).write();
+      res.json({ success: true, message: 'Habitación borrada satisfactoriamente' });
+    } else {
+      res.status(404).json({ success: false, message: 'Habitación no encontrada' });
+    }
+  } else {
+    res.status(404).json({ success: false, message: 'Hotel no encontrado' });
+  }
+});
+
+//End rooms apis
+
 
 // Use cors middleware
 app.use(cors());
 
 app.use('/api', jsonServerApp);
 
-const PORT = process.env.PORT || 3000;
+//prod
+// const PORT = process.env.PORT || 3000;
+//develop
+const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
