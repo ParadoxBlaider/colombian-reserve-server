@@ -31,11 +31,9 @@ jsonServerApp.get('/users', (req, res) => {
 });
 
 //Hotels apis
-
 jsonServerApp.get('/hotels', (req, res) => {
   res.json(jsonServerRouter.db.get('hotels'));
 });
-
 jsonServerApp.get('/hotels/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const hotels = jsonServerRouter.db.get('hotels').value();
@@ -46,7 +44,6 @@ jsonServerApp.get('/hotels/:id', (req, res) => {
     res.status(404).json({ success: false, message: 'Hoteles no encontrados' });
   }
 });
-
 jsonServerApp.patch('/hotels/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const data = req.body;
@@ -62,7 +59,6 @@ jsonServerApp.patch('/hotels/:id', (req, res) => {
     res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
-
 jsonServerApp.post('/hotels', (req, res) => {
   const newHotel = req.body;
   const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
@@ -79,7 +75,6 @@ jsonServerApp.post('/hotels', (req, res) => {
     res.status(404).json({ success: false, message: 'Hubo un error al crear el hotel' });
   }
 });
-
 jsonServerApp.patch('/hotels/:id/status', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const newStatus = req.body.status;
@@ -93,8 +88,6 @@ jsonServerApp.patch('/hotels/:id/status', (req, res) => {
     res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
-
-
 jsonServerApp.delete('/hotels/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
@@ -108,7 +101,6 @@ jsonServerApp.delete('/hotels/:id', (req, res) => {
     res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
-
 jsonServerApp.patch('/hotels/:id/rooms', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const data = req.body;
@@ -149,11 +141,9 @@ jsonServerApp.patch('/hotels/:id/rooms', (req, res) => {
     res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
-
 //End hotels apis
 
 //Rooms apis
-
 jsonServerApp.get('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
   const hotelId = parseInt(req.params.hotelId, 10);
   const roomId = parseInt(req.params.roomId, 10);
@@ -177,7 +167,6 @@ jsonServerApp.get('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
     res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
-
 jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId/status', (req, res) => {
   const hotelId = parseInt(req.params.hotelId, 10);
   const roomId = parseInt(req.params.roomId, 10);
@@ -201,7 +190,6 @@ jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId/status', (req, res
     res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
-
 jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
   const hotelId = parseInt(req.params.hotelId, 10);
   const roomId = parseInt(req.params.roomId, 10);
@@ -225,7 +213,6 @@ jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
     res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
-
 jsonServerApp.post('/hotels/:id/available-rooms', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const newAvailableRoom = req.body;
@@ -245,8 +232,6 @@ jsonServerApp.post('/hotels/:id/available-rooms', (req, res) => {
     res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
-
-
 jsonServerApp.delete('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
   const hotelId = parseInt(req.params.hotelId, 10);
   const roomId = parseInt(req.params.roomId, 10);
@@ -270,8 +255,57 @@ jsonServerApp.delete('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
     res.status(404).json({ success: false, message: 'Hotel no encontrado' });
   }
 });
-
 //End rooms apis
+
+//Bookings apis
+jsonServerApp.get('/bookings', (req, res) => {
+  const bookings = _.cloneDeep(jsonServerRouter.db.get('bookings').value());
+  const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
+  const bookingsWithHotelInfo = bookings.map((booking) => {
+    const hotel = hotels.find((hotel) => hotel.id === booking.hotel_id);
+    if (hotel) {
+      const room = hotel.rooms.find((room) => room.id === booking.room_id);
+      return {
+        ...booking,
+        hotel: hotel, // Agrega la información del hotel a cada reserva
+        room: room
+      };
+    } else {
+      // Manejar el caso donde no se encuentra el hotel
+      return booking;
+    }
+  });
+  if (bookings) {
+    res.json({ success: true, bookings: bookingsWithHotelInfo });
+  }
+  else {
+    res.status(404).json({ success: false, message: 'Reserva no encontrada' });
+  }
+  /* res.json(jsonServerRouter.db.get('bookings')); */
+});
+jsonServerApp.get('/bookings/:bookingId', (req, res) => {
+  const id = parseInt(req.params.bookingId, 10);
+  const bookings = _.cloneDeep(jsonServerRouter.db.get('bookings').value());
+  if (bookings) {
+    const booking = bookings.find((booking) => booking.id === id);
+    const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
+    const hotel = hotels.find((hotel) => hotel.id === booking.hotel_id);
+    if(hotel){
+      booking.hotel = hotel
+      const room = hotel.rooms.find((room) => room.id === booking.room_id);
+      if(room){
+        booking.room = room
+      }
+    }
+    res.json({ success: true, booking: booking });
+  }
+  else {
+    res.status(404).json({ success: false, message: 'Reserva no encontrada' });
+  }
+  /* res.json(jsonServerRouter.db.get('bookings')); */
+});
+//End bookings apis
+
 
 
 // Use cors middleware

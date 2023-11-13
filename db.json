@@ -31,9 +31,9 @@
           "status": true
         },
         {
-          "number": "12",
+          "number": 402,
           "base_price": 30000,
-          "location": "Piso 1",
+          "location": "Piso 4",
           "type": "Doble",
           "tax": 19,
           "max_people": 10,
@@ -54,9 +54,9 @@
           "used": true
         },
         {
-          "number": "12",
+          "number": 402,
           "base_price": 30000,
-          "location": "Piso 1",
+          "location": "Piso 4",
           "type": "Doble",
           "tax": 19,
           "max_people": 10,
@@ -75,6 +75,43 @@
       "rooms": [],
       "available_rooms": [],
       "status": true
+    }
+  ],
+  "bookings": [
+    {
+      "id": 1,
+      "hotel_id": 1,
+      "room_id": 1,
+      "check_in_date": "2023-11-15",
+      "check_out_date": "2023-11-20",
+      "quatity_people": 1,
+      "guests": [
+        {
+          "name": "Juan",
+          "last_name": "Pérez",
+          "birthdate": "1990-05-15",
+          "genre": "Masculino",
+          "type_document": "DNI",
+          "document_number": "12345678",
+          "email": "juan@example.com",
+          "cellphone": "123456789"
+        },
+        {
+          "name": "William",
+          "last_name": "Carenepe",
+          "birthdate": "1990-05-15",
+          "genre": "No se sabe",
+          "type_document": "DNI",
+          "document_number": "12345678",
+          "email": "juan@example.com",
+          "cellphone": "123456789"
+        }
+      ],
+      "emergency_contact": {
+        "name": "Ana",
+        "last_name": "Gómez",
+        "cellphone": "987654321"
+      }
     }
   ],
   "auth": []
