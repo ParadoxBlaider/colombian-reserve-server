@@ -72,10 +72,10 @@ jsonServerApp.post('/hotels', (req, res) => {
   newHotel.status = true;
   hotels.push(newHotel);
   const resp = jsonServerRouter.db.set('hotels', hotels).write();
-  if(resp){
-    res.json({ hotel: newHotel,success: true, message: 'Hotel creado satisfactoriamente' });
+  if (resp) {
+    res.json({ hotel: newHotel, success: true, message: 'Hotel creado satisfactoriamente' });
   }
-  else{
+  else {
     res.status(404).json({ success: false, message: 'Hubo un error al crear el hotel' });
   }
 });
@@ -94,6 +94,7 @@ jsonServerApp.patch('/hotels/:id/status', (req, res) => {
   }
 });
 
+
 jsonServerApp.delete('/hotels/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
@@ -108,9 +109,74 @@ jsonServerApp.delete('/hotels/:id', (req, res) => {
   }
 });
 
+jsonServerApp.patch('/hotels/:id/rooms', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const data = req.body;
+  const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
+  const hotel = hotels.find((hotel) => hotel.id === id);
+  if (hotel) {
+    if (data.rooms.length > 0) {
+      hotel.available_rooms = hotel.available_rooms.map(room_available => {
+        return {
+          ...room_available,
+          used: false
+        };
+      })
+      let rooms_for_add = hotel.available_rooms.filter(room => data.rooms.includes(room.id) && !room.used);
+      rooms_for_add = rooms_for_add.map(room => {
+        const { used, ...rest } = room;
+        return rest;
+      });
+      hotel.rooms = rooms_for_add
+      hotel.available_rooms = hotel.available_rooms.map(room_available => {
+        // Verificar si la habitación está en rooms_for_add, actualizar su estado
+        if (rooms_for_add.some(room => room.id === room_available.id)) {
+          return {
+            ...room_available,
+            used: true
+          };
+        } else {
+          return room_available;
+        }
+      });
+    }
+    else {
+      hotel.rooms = []
+    }
+    jsonServerRouter.db.set('hotels', hotels).write();
+    res.json({ success: true, message: `${data.rooms.length > 0 ? 'Habitaciones' : 'Habitación'} del hotel ${data.rooms.length > 0 ? 'modificadas' : 'modificada'} correctamente` });
+  } else {
+    res.status(404).json({ success: false, message: 'Hotel no encontrado' });
+  }
+});
+
 //End hotels apis
 
 //Rooms apis
+
+jsonServerApp.get('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
+  const hotelId = parseInt(req.params.hotelId, 10);
+  const roomId = parseInt(req.params.roomId, 10);
+
+  const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
+  const hotel = hotels.find((hotel) => hotel.id === hotelId);
+
+  if (hotel) {
+    // Find the room in available_rooms
+    const room = hotel.available_rooms.find((room) => room.id === roomId);
+    if (room) {
+      room.hotel = {
+        id: hotel.id,
+        name: hotel.name,
+      };
+      res.json({ success: true, room });
+    } else {
+      res.status(404).json({ success: false, message: 'Habitación no encontrada' });
+    }
+  } else {
+    res.status(404).json({ success: false, message: 'Hotel no encontrado' });
+  }
+});
 
 jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId/status', (req, res) => {
   const hotelId = parseInt(req.params.hotelId, 10);
@@ -121,12 +187,37 @@ jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId/status', (req, res
   const hotel = hotels.find((hotel) => hotel.id === hotelId);
 
   if (hotel) {
-    const room = hotel.available_rooms.find((room) => room.id === roomId);
-    if (room) {
-      room.status = newStatus;
-
+    const rooms_available = hotel.available_rooms.find((room) => room.id === roomId);
+    const rooms = hotel.rooms.find((room) => room.id === roomId);
+    if (rooms && rooms_available) {
+      rooms_available.status = newStatus;
+      rooms.status = newStatus;
       jsonServerRouter.db.set('hotels', hotels).write();
       res.json({ success: true, message: 'Estado de la habitación actualizado satisfactoriamente' });
+    } else {
+      res.status(404).json({ success: false, message: 'Habitación no encontrada' });
+    }
+  } else {
+    res.status(404).json({ success: false, message: 'Hotel no encontrado' });
+  }
+});
+
+jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
+  const hotelId = parseInt(req.params.hotelId, 10);
+  const roomId = parseInt(req.params.roomId, 10);
+  const updatedRoomData = req.body; // Assuming the request body contains the updated room data
+
+  const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
+  const hotel = hotels.find((hotel) => hotel.id === hotelId);
+
+  if (hotel) {
+    const roomIndex = hotel.rooms.findIndex((room) => room.id === roomId);
+    const roomAvailableIndex = hotel.available_rooms.findIndex((room) => room.id === roomId);
+    if (roomIndex !== -1 && roomAvailableIndex !== -1) {
+      hotel.rooms[roomIndex] = { ...hotel.rooms[roomIndex], ...updatedRoomData };
+      hotel.available_rooms[roomAvailableIndex] = { ...hotel.available_rooms[roomAvailableIndex], ...updatedRoomData };
+      jsonServerRouter.db.set('hotels', hotels).write();
+      res.json({ success: true, message: 'Habitación actualizada satisfactoriamente' });
     } else {
       res.status(404).json({ success: false, message: 'Habitación no encontrada' });
     }
@@ -145,6 +236,7 @@ jsonServerApp.post('/hotels/:id/available-rooms', (req, res) => {
     // Asigna un nuevo id a la habitación disponible
     newAvailableRoom.id = hotel.available_rooms.length + 1;
     newAvailableRoom.status = true
+    newAvailableRoom.used = false
     hotel.available_rooms.push(newAvailableRoom);
 
     jsonServerRouter.db.set('hotels', hotels).write();
@@ -163,11 +255,12 @@ jsonServerApp.delete('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
   const hotel = hotels.find((hotel) => hotel.id === hotelId);
 
   if (hotel) {
-    const index = hotel.available_rooms.findIndex((room) => room.id === roomId);
+    const index_room = hotel.rooms.findIndex((room) => room.id === roomId);
+    const index_available_room = hotel.available_rooms.findIndex((room) => room.id === roomId);
 
-    if (index !== -1) {
-      hotel.available_rooms.splice(index, 1);
-
+    if (index_room !== -1 && index_available_room !== -1) {
+      hotel.rooms.splice(index_room, 1);
+      hotel.available_rooms.splice(index_available_room, 1);
       jsonServerRouter.db.set('hotels', hotels).write();
       res.json({ success: true, message: 'Habitación borrada satisfactoriamente' });
     } else {

@@ -15,12 +15,11 @@
   ],
   "hotels": [
     {
-      "name": "Nasus INC",
-      "city": "Bogotá",
-      "address": "Calle 181 #10-10",
       "id": 1,
-      "rooms": [],
-      "available_rooms": [
+      "name": "Nasus INC",
+      "city": "Medellín",
+      "address": "Calle 181 #10-10",
+      "rooms": [
         {
           "id": 1,
           "number": 101,
@@ -29,16 +28,6 @@
           "type": "Individual",
           "tax": 20,
           "max_people": 6,
-          "status": true
-        },
-        {
-          "number": "502",
-          "base_price": 30000,
-          "location": "Piso 5",
-          "type": "individual",
-          "tax": 10,
-          "max_people": 6,
-          "id": 2,
           "status": true
         },
         {
@@ -52,6 +41,30 @@
           "status": true
         }
       ],
+      "available_rooms": [
+        {
+          "id": 1,
+          "number": 101,
+          "base_price": 80000,
+          "location": "Piso 1",
+          "type": "Individual",
+          "tax": 20,
+          "max_people": 6,
+          "status": true,
+          "used": true
+        },
+        {
+          "number": "12",
+          "base_price": 30000,
+          "location": "Piso 1",
+          "type": "Doble",
+          "tax": 19,
+          "max_people": 10,
+          "id": 3,
+          "status": true,
+          "used": true
+        }
+      ],
       "status": true
     },
     {
@@ -60,18 +73,7 @@
       "address": "Calle 181 #10-10",
       "id": 2,
       "rooms": [],
-      "available_rooms": [
-        {
-          "number": "101",
-          "base_price": 20000,
-          "location": "Piso 1",
-          "type": "Individual",
-          "tax": 20,
-          "max_people": 5,
-          "id": 1,
-          "status": true
-        }
-      ],
+      "available_rooms": [],
       "status": true
     }
   ],
