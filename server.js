@@ -199,7 +199,6 @@ jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
 
   const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
   const hotel = hotels.find((hotel) => hotel.id === hotelId);
-  console.log(hotels, hotel)
   if (hotel) {
     const roomIndex = hotel.rooms.findIndex((room) => room.id === roomId);
     const roomAvailableIndex = hotel.available_rooms.findIndex((room) => room.id === roomId);
