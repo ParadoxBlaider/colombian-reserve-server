@@ -16,27 +16,39 @@
   "hotels": [
     {
       "id": 1,
-      "name": "Nasus INC",
+      "name": "Nasus Roto INC",
       "city": "Medellín",
       "address": "Calle 181 #10-10",
       "rooms": [
         {
           "id": 1,
-          "number": 101,
+          "number": 1023,
           "base_price": 80000,
           "location": "Piso 1",
           "type": "Individual",
           "tax": 20,
           "max_people": 6,
-          "status": true
+          "status": true,
+          "dates_reservations": [
+            {
+              "check_in": "2023-11-14",
+              "check_out": "2023-11-16"
+            }
+          ]
         },
         {
-          "number": 402,
-          "base_price": 30000,
-          "location": "Piso 4",
-          "type": "Doble",
-          "tax": 19,
-          "max_people": 10,
+          "number": 232,
+          "base_price": 312312,
+          "location": "Piso 2",
+          "type": "Individual",
+          "tax": 10,
+          "max_people": 2,
+          "dates_reservations": [
+            {
+              "check_in": "2023-11-14",
+              "check_out": "2023-11-16"
+            }
+          ],
           "id": 3,
           "status": true
         }
@@ -44,22 +56,24 @@
       "available_rooms": [
         {
           "id": 1,
-          "number": 101,
+          "number": 1023,
           "base_price": 80000,
           "location": "Piso 1",
           "type": "Individual",
           "tax": 20,
           "max_people": 6,
           "status": true,
-          "used": true
+          "used": true,
+          "dates_reservations": []
         },
         {
-          "number": 402,
-          "base_price": 30000,
-          "location": "Piso 4",
-          "type": "Doble",
-          "tax": 19,
-          "max_people": 10,
+          "number": 232,
+          "base_price": 312312,
+          "location": "Piso 2",
+          "type": "Individual",
+          "tax": 10,
+          "max_people": 2,
+          "dates_reservations": [],
           "id": 3,
           "status": true,
           "used": true
@@ -68,12 +82,37 @@
       "status": true
     },
     {
-      "name": "TEST INC",
-      "city": "Medellín",
-      "address": "Calle 181 #10-10",
-      "id": 2,
-      "rooms": [],
-      "available_rooms": [],
+      "name": "HotelLaila",
+      "city": "Bogotá",
+      "address": "Anona, Arboledas del sur",
+      "id": 3,
+      "rooms": [
+        {
+          "number": 1,
+          "base_price": 1,
+          "location": "1",
+          "type": "Individual",
+          "tax": 1,
+          "max_people": 2,
+          "dates_reservations": [],
+          "id": 1,
+          "status": true
+        }
+      ],
+      "available_rooms": [
+        {
+          "number": 1,
+          "base_price": 1,
+          "location": "1",
+          "type": "Individual",
+          "tax": 1,
+          "max_people": 2,
+          "dates_reservations": [],
+          "id": 1,
+          "status": true,
+          "used": true
+        }
+      ],
       "status": true
     }
   ],
@@ -81,37 +120,133 @@
     {
       "id": 1,
       "hotel_id": 1,
-      "room_id": 1,
+      "room_id": 3,
       "check_in_date": "2023-11-15",
-      "check_out_date": "2023-11-20",
-      "quatity_people": 1,
+      "check_out_date": "2023-11-30",
+      "quantity_people": 1,
       "guests": [
         {
-          "name": "Juan",
-          "last_name": "Pérez",
-          "birthdate": "1990-05-15",
+          "name": "qweqw",
+          "last_name": "ewqewqe",
+          "birthday": "2023-11-15",
+          "type_document": "Cédula de ciudadanía",
+          "document_number": "123123123",
           "genre": "Masculino",
-          "type_document": "DNI",
-          "document_number": "12345678",
-          "email": "juan@example.com",
-          "cellphone": "123456789"
-        },
-        {
-          "name": "William",
-          "last_name": "Carenepe",
-          "birthdate": "1990-05-15",
-          "genre": "No se sabe",
-          "type_document": "DNI",
-          "document_number": "12345678",
-          "email": "juan@example.com",
-          "cellphone": "123456789"
+          "email": "maacevedog2010@gmail.com",
+          "cellphone": "1231231232"
         }
       ],
       "emergency_contact": {
-        "name": "Ana",
-        "last_name": "Gómez",
-        "cellphone": "987654321"
+        "name": "Miguelqwe",
+        "cellphone": 123213123
       }
+    },
+    {
+      "id": 2,
+      "hotel_id": 1,
+      "room_id": 3,
+      "check_in_date": "2023-11-15",
+      "check_out_date": "2023-11-30",
+      "quantity_people": 1,
+      "guests": [
+        {
+          "name": "qweqw",
+          "last_name": "ewqewqe",
+          "birthday": "2023-11-15",
+          "type_document": "Cédula de ciudadanía",
+          "document_number": "123123123",
+          "genre": "Masculino",
+          "email": "maacevedog2010@gmail.com",
+          "cellphone": "1231231232"
+        }
+      ],
+      "emergency_contact": {
+        "name": "Miguelqwe",
+        "last_name": "testqwe",
+        "cellphone": 123213123
+      }
+    },
+    {
+      "id": 3,
+      "hotel_id": 1,
+      "room_id": 3,
+      "check_in_date": "2023-11-15",
+      "check_out_date": "2023-11-30",
+      "quantity_people": 1,
+      "guests": [
+        {
+          "name": "qweqw",
+          "last_name": "ewqewqe",
+          "birthday": "2023-11-15",
+          "type_document": "Cédula de ciudadanía",
+          "document_number": "123123123",
+          "genre": "Masculino",
+          "email": "maacevedog2010@gmail.com",
+          "cellphone": "1231231232"
+        }
+      ],
+      "emergency_contact": {
+        "name": "Miguelqwe",
+        "last_name": "testqwe",
+        "cellphone": 123213123
+      }
+    },
+    {
+      "id": 4,
+      "hotel_id": 1,
+      "room_id": 1,
+      "check_in_date": "2023-11-15",
+      "check_out_date": "2023-11-30",
+      "quantity_people": 1,
+      "guests": [
+        {
+          "name": "qweqw",
+          "last_name": "ewqewqe",
+          "birthday": "2023-11-15",
+          "type_document": "Cédula de ciudadanía",
+          "document_number": "123123123",
+          "genre": "Masculino",
+          "email": "maacevedog2010@gmail.com",
+          "cellphone": "1231231232"
+        }
+      ],
+      "emergency_contact": {
+        "name": "Miguelqwe",
+        "last_name": "testqwe",
+        "cellphone": 123213123
+      }
+    }
+  ],
+  "hotels_banners": [
+    {
+      "id": 1,
+      "url": "https://images.pexels.com/photos/189296/pexels-photo-189296.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+    },
+    {
+      "id": 2,
+      "url": "https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+    },
+    {
+      "id": 3,
+      "url": "https://images.pexels.com/photos/1458457/pexels-photo-1458457.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+    }
+  ],
+  "cities": [
+    {
+      "id": 1,
+      "name": "Bogotá"
+    },
+    {
+      "id": 2,
+      "name": "Medellín"
+    },
+    {
+      "id": 3,
+      "name": "Ibagué"
+    },
+    {
+      "id": 4,
+      "name": "Popayán"
     }
   ],
   "auth": []

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const jsonServer = require('json-server');
 const path = require('path');
+const sgMail = require('@sendgrid/mail');
 
 const app = express();
 const jsonServerApp = jsonServer.create();
@@ -62,7 +63,7 @@ jsonServerApp.patch('/hotels/:id', (req, res) => {
 jsonServerApp.post('/hotels', (req, res) => {
   const newHotel = req.body;
   const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
-  newHotel.id = hotels.length + 1;
+  newHotel.id = hotels.length > 0 ? hotels[hotels.length - 1].id + 1 : hotels.length + 1;
   newHotel.rooms = [];
   newHotel.available_rooms = [];
   newHotel.status = true;
@@ -180,6 +181,7 @@ jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId/status', (req, res
     const rooms = hotel.rooms.find((room) => room.id === roomId);
     if (rooms && rooms_available) {
       rooms_available.status = newStatus;
+      rooms.dates_reservations = rooms.dates_reservations
       rooms.status = newStatus;
       jsonServerRouter.db.set('hotels', hotels).write();
       res.json({ success: true, message: 'Estado de la habitación actualizado satisfactoriamente' });
@@ -218,12 +220,12 @@ jsonServerApp.post('/hotels/:id/available-rooms', (req, res) => {
   const newAvailableRoom = req.body;
   const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
   const hotel = hotels.find((hotel) => hotel.id === id);
-
   if (hotel) {
     // Asigna un nuevo id a la habitación disponible
-    newAvailableRoom.id = hotel.available_rooms.length + 1;
+    newAvailableRoom.id = hotel.available_rooms.length > 0 ? hotel.available_rooms[hotel.available_rooms.length - 1].id + 1 : hotel.available_rooms.length + 1;
     newAvailableRoom.status = true
     newAvailableRoom.used = false
+    newAvailableRoom.dates_reservations = [];
     hotel.available_rooms.push(newAvailableRoom);
 
     jsonServerRouter.db.set('hotels', hotels).write();
@@ -290,10 +292,10 @@ jsonServerApp.get('/bookings/:bookingId', (req, res) => {
     const booking = bookings.find((booking) => booking.id === id);
     const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
     const hotel = hotels.find((hotel) => hotel.id === booking.hotel_id);
-    if(hotel){
+    if (hotel) {
       booking.hotel = hotel
       const room = hotel.rooms.find((room) => room.id === booking.room_id);
-      if(room){
+      if (room) {
         booking.room = room
       }
     }
@@ -304,7 +306,114 @@ jsonServerApp.get('/bookings/:bookingId', (req, res) => {
   }
   /* res.json(jsonServerRouter.db.get('bookings')); */
 });
+
 //End bookings apis
+
+//End bookings page apis
+
+jsonServerApp.get('/hotels_banners', (req, res) => {
+  res.json(jsonServerRouter.db.get('hotels_banners'));
+});
+
+jsonServerApp.get('/hotels-web', (req, res) => {
+  const hotelsWithFilteredRooms = jsonServerRouter.db
+    .get('hotels')
+    .filter((hotel) => hotel.status === true)
+    .map((hotel) => ({
+      ...hotel,
+      rooms: hotel.rooms.filter((room) => room.status === true),
+      available_rooms: hotel.available_rooms.filter((room) => room.status === true),
+    }));
+
+  res.json(hotelsWithFilteredRooms);
+});
+
+jsonServerApp.get('/cities', (req, res) => {
+  res.json(jsonServerRouter.db.get('cities'));
+});
+
+jsonServerApp.post('/hotels_filtered', (req, res) => {
+  const { city, check_in, check_out, quantity_people } = req.body;
+  if (!city && !check_in && !check_out) {
+    return res.json(jsonServerRouter.db.get('hotels'));
+  }
+  if (!city || !check_in || !check_out) {
+    return res.status(400).json({ success: false, message: 'Faltan campos para completar la busqueda' });
+  }
+  const quantityPeople = quantity_people || 1;
+  const filteredHotels = jsonServerRouter.db.get('hotels').filter((hotel) => {
+    return (
+      hotel.city === city &&
+      hotel.status === true &&
+      hotel.available_rooms.some((room) =>
+        room.max_people >= quantityPeople
+        /*   !room.dates_reservations.some((reservation) =>
+            isOverlap(check_in, check_out, reservation.check_in, reservation.check_out)
+          ) */
+      )
+    );
+  });
+  const resultWithActiveRooms = filteredHotels.map((hotel) => {
+    const activeRooms = hotel.rooms.filter((room) => room.status === true);
+    return { ...hotel, rooms: activeRooms };
+  });
+  res.json(resultWithActiveRooms);
+});
+
+/* function isOverlap(start1, end1, start2, end2) {
+  return !(new Date(start1) >= new Date(end2) || new Date(end1) <= new Date(start2));
+} */
+
+
+jsonServerApp.post('/reservation', async (req, res) => {
+  const { hotel_id, check_in, check_out, room_id, quantity_people, guests, emergency_contact } = req.body;
+  /* , check_out_date, */
+  if (!hotel_id || !room_id || !quantity_people || !guests) {
+    return res.status(400).json({ success: false, message: 'Faltan parámetros requeridos' });
+  }
+
+  const bookings = _.cloneDeep(jsonServerRouter.db.get('bookings').value());
+
+  // Aquí puedes agregar la lógica para guardar la reserva en tu base de datos
+  const newBooking = {
+    id: bookings.length + 1, // Puedes utilizar una función para generar IDs únicos
+    hotel_id,
+    room_id,
+    check_in_date:check_in,
+    check_out_date:check_out,
+    quantity_people,
+    guests,
+    emergency_contact
+  };
+  // Agrega la nueva reserva a tu lista de reservas
+  bookings.push(newBooking);
+  const resp = jsonServerRouter.db.set('bookings', bookings).write();
+  if (resp) {
+
+    sgMail.setApiKey('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');
+
+    const msg = {
+      to: guests[0].email,
+      from: 'maacevedog2010@gmail.com',
+      subject: 'Reserva realizada',
+      text: 'Reserva realizada satisfactoriamente en nuestra plataforma'
+    };
+
+    sgMail.send(msg)
+      .then(() => console.log('Correo enviado con éxito'))
+      .catch(error => console.error('Error al enviar el correo:', error.response ? error.response.body : error));
+    // Envía el correo electrónico
+
+    res.json({ success: true, message: 'Reserva creada con éxito' });
+  }
+  else {
+    res.status(404).json({ success: false, message: 'Hubo un error al crear la reserva' });
+  }
+});
+
+
+//End bookings page apis
+
 
 
 
