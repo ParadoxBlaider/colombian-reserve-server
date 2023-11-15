@@ -199,13 +199,17 @@ jsonServerApp.patch('/hotels/:hotelId/available-rooms/:roomId', (req, res) => {
 
   const hotels = _.cloneDeep(jsonServerRouter.db.get('hotels').value());
   const hotel = hotels.find((hotel) => hotel.id === hotelId);
-
+  console.log(hotels, hotel)
   if (hotel) {
     const roomIndex = hotel.rooms.findIndex((room) => room.id === roomId);
     const roomAvailableIndex = hotel.available_rooms.findIndex((room) => room.id === roomId);
-    if (roomIndex !== -1 && roomAvailableIndex !== -1) {
-      hotel.rooms[roomIndex] = { ...hotel.rooms[roomIndex], ...updatedRoomData };
-      hotel.available_rooms[roomAvailableIndex] = { ...hotel.available_rooms[roomAvailableIndex], ...updatedRoomData };
+    if (roomIndex !== -1 || roomAvailableIndex !== -1) {
+      if(roomIndex !== -1){
+        hotel.rooms[roomIndex] = { ...hotel.rooms[roomIndex], ...updatedRoomData };
+      }
+      if(roomAvailableIndex !== -1){
+        hotel.available_rooms[roomAvailableIndex] = { ...hotel.available_rooms[roomAvailableIndex], ...updatedRoomData };
+      }
       jsonServerRouter.db.set('hotels', hotels).write();
       res.json({ success: true, message: 'Habitación actualizada satisfactoriamente' });
     } else {
